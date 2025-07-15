@@ -9,7 +9,7 @@ const clerkWebhooks = async (req, res)=>{
         const headers = {
             "svix-id": req.headers["svix-id"],
             "svix-timestamp": req.headers["svix-timestamp"],
-            "svix-signatue": req.headers["svix-signature"],
+            "svix-signature": req.headers["svix-signature"],
         };
 
         //Verifying headers
@@ -20,8 +20,8 @@ const clerkWebhooks = async (req, res)=>{
 
         const userData = {
             _id: data.id,
-            email: data.email_addresses[0].email_addresses,
-            username: data.firstname + " " + data.lastname,
+            email: data.email_addresses[0].email_addresse,
+            username: data.first_name + " " + data.last_name,
             image: data.image_url
         }
 
