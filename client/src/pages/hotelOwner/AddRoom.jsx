@@ -1,8 +1,61 @@
 import React, { useState } from 'react'
 import Title from '../../components/Title'
 import { assets } from '../../assets/assets'
+import { useAppContext } from '../../context/AppContext'
+import toast from 'react-hot-toast'
 
 const AddRoom = () => {
+
+  const {axios, getToken} = useAppContext()
+  
+  const [loading, setLoading] = useState(false)
+
+  const onSubmitHandler = async (e) => {
+    e.preventDefault();
+    // check if all inputs are filled
+    if(!inputs.roomType || !inputs.pricePerNight || !inputs.amenities || !Object.values(images).some(image => image)){
+      toast.error("Please fill in all the details")
+      return
+    }
+    setLoading(true)
+    try {
+      const formData = new FormData()
+      formData.append('roomType', inputs.roomType)
+      formData.append('pricePerNight', inputs.pricePerNight)
+      // Converting amenities to array & keeping only enabled amenities
+      const amenities = Object.keys(inputs.amenities).filter(key => inputs.amenities[key])
+      formData.append('amenities', JSON.stringify(amenities))
+
+      // Adding images to form data
+      Object.keys(images).forEach((key)=>{
+        images[key] && formData.append('images', images[key])
+      })
+
+      const {data} = await axios.post('/api/rooms', formData, {headers: {Authorization: `Bearer ${await getToken()}`}})
+
+      if(data.success){
+        toast.success(data.message)
+        setInputs({
+          roomType: '',
+          pricePerNight: 0,
+          amenities: {
+            'Free Wifi': false,
+            'Free Breakfast': false,
+            'Moutain View': false,
+            'Pool Access': false,
+            'Room Service': false
+          }
+        })
+        setImages({1: null, 2: null, 3: null, 4:null})
+      }else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+        toast.error(error.message)
+    }finally{
+      setLoading(false);
+    }
+  }
 
   const [images, setImages] = useState({
       1: null,
@@ -17,6 +70,7 @@ const AddRoom = () => {
       amenities: {
         'Free Wifi' : false,
         'Free Breakfast' : false,
+        'Room service' : false,
         'Moutain View' : false,
         'Pool Access' : false,
       }
@@ -24,7 +78,7 @@ const AddRoom = () => {
 
 
   return (
-    <form>
+    <form onSubmit={onSubmitHandler}>
       <Title align='left' font='outfit' title='Add Rooms' subTitle='Fill in the details carefully and accurate room details, pricing, and amenities to enhance the user booking experience.' />
       {/* Upload images */}
       <p className='text-gray-800 mt-10'>Images</p>
@@ -59,14 +113,14 @@ const AddRoom = () => {
       <p className='text-gray-800 mt-4'>Amenities</p>
       <div className='flex flex-col flex-wrap mt-1 text-gray-400 max-w-sm'>
         {Object.keys(inputs.amenities).map((amenity, index)=> (
-          <div key={index}>
+          <div key={amenity}>
             <input type="checkbox" id={`amenities${index+1}`} checked={inputs.amenities[amenity]} onChange={()=>setInputs({...inputs, amenities: {...inputs.amenities, [amenity]: !inputs.amenities[amenity]}})} />
             <label htmlFor={`amenities${index+1}`}> {amenity}</label>
           </div>
         ))}
       </div>
-      <button className='bg-primary text-white px-8 py-2 rounded mt-2 cursor-pointer'>
-        Add Rooms
+      <button className='bg-primary text-white px-8 py-2 rounded mt-2 cursor-pointer' disabled={loading}>
+        {loading ? 'Adding...' : 'Add Rooms'}
       </button>
     </form>
   )
