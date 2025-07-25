@@ -16,6 +16,7 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const {data} = await axios.get('/api/bookings/hotels', {headers: {Authorization: `Bearer ${await getToken()}`}})
+      console.log('Dashboard API response:', data);
       if(data.success){
         setDashboardData(data.dashboardData)
       }else{
@@ -23,6 +24,7 @@ const Dashboard = () => {
       }
     } catch (error) {
         toast.error(error.message)
+        console.error('Dashboard error:', error);
     }
   }
 
