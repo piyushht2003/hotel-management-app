@@ -111,7 +111,3 @@ The server will listen on the port specified in `.env` or default to 3000.
 This project is licensed under the ISC License.
 
 ---
-
-## Contact
-
-For any questions or issues, please contact the project maintainer.
